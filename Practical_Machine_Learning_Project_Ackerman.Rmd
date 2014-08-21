@@ -23,7 +23,7 @@ inTrain <- createDataPartition(y=pml.training$classe, p=0.9, list=FALSE)
 training <- pml.training[inTrain,]
 testing <- pml.training[-inTrain,]
 ```
-Note: To run this code, you will need to switch what is inside `read.csv("")` to your location of the data.   The 90 percent subsample is used to train the modle, and the 10 percent sample is used for cross-validation.  I chose this simple cross-validation rather than using something like K-fold via the `cv.folds` option to cut down on execution time, which was already quite lengthy.  Next, I implement a Stochastic Gradient Boosting algorithm via the `gbm` package.
+Note: To run this code, you will need to switch what is inside `read.csv("")` to your location of the data.   The 90 percent subsample is used to train the model, and the 10 percent sample is used for cross-validation.  I chose this simple cross-validation rather than using something like K-fold via the `cv.folds` option to cut down on execution time, which was already quite lengthy.  Next, I implement a Stochastic Gradient Boosting algorithm via the `gbm` package.
 ```{r}
 ptm <- proc.time()
 modFit <- train(classe ~ user_name + pitch_arm + yaw_arm + roll_arm + roll_belt + pitch_belt + yaw_belt + gyros_belt_x + gyros_belt_y + gyros_belt_z + accel_belt_x + accel_belt_y + accel_belt_z + magnet_belt_x + magnet_belt_y + magnet_belt_z + gyros_arm_x + gyros_arm_y + gyros_arm_z + accel_arm_x + accel_arm_y + accel_arm_z + magnet_arm_x + magnet_arm_y + magnet_arm_z + roll_dumbbell + pitch_dumbbell + yaw_dumbbell, method="gbm", data=training, verbose=FALSE)
@@ -44,6 +44,7 @@ A plot of these top two features colored by outcome demonstrates their relative 
 ```{r}
 qplot(roll_belt, yaw_belt,colour=classe,data=training)
 ```
+
 Even though these are the top features, they're still not great predictors in their own right.  Nonetheless, you can see some bunching in this simple plot.  This confirms the choice of a boosting algorithm as a good choice given the large set of relatively weak predictors.  This next plot further demonstrates the improved performance gained by using boosting iterations.
 
 ```{r}
@@ -55,7 +56,7 @@ Next, I check the performance on the 10 percent subsample to get an estimate of 
 predictTe <- predict(modFit,testing)
 table(predictTe, testing$classe)
 ```
-The algorithm actually peforms only does slightly worse on the testing subset than it did on the full training set, correctly classifying 93.4 percent of the observations.
+The algorithm only does slightly worse on the 10 percent subset than it did on the full training set, correctly classifying 93.4 percent of the observations.
 
 ## Predicting on the Test Set
 Finally, I use the algorithm to predict using the testing set.  The results are run through the `pml_write_files()` function from the course Coursera site, and stored for submission.  
